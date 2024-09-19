@@ -41,5 +41,4 @@ USER django-user
 VOLUME /vol/web/media
 VOLUME /vol/web/static
 
-
 CMD ["run.sh"]
