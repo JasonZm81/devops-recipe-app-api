@@ -10,7 +10,7 @@ server {
     }
 
     location / {
-        include                 gunicorn_headers;
+        include              gunicorn_headers;
         proxy_redirect       off;
         proxy_pass           http://${APP_HOST}:${APP_PORT};
 
