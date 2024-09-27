@@ -54,6 +54,3 @@ jobs:
           docker compose run --rm terraform -chdir=deploy/ workspace select -or-create $workspace
           docker compose run --rm terraform -chdir=deploy/ apply -auto-approve
 
-
-
-
