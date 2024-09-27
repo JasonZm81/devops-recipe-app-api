@@ -40,7 +40,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Terraform lint
         run: |
-          cd infra /
+          cd infra/
           docker compose run --rm terraform -chdir=setup/ init -backend=false
           docker compose run --rm terraform -chdir=setup/ init validate
           docker compose run --rm terraform -chdir=setup/ init fmt -check
