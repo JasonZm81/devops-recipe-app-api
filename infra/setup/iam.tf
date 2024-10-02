@@ -153,3 +153,4 @@ resource "aws_iam_user_policy_attachment" "ec2" {
   user       = aws_iam_user.cd.name
   policy_arn = aws_iam_policy.ec2.arn
 }
+
