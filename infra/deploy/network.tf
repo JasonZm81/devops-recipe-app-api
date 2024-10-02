@@ -15,5 +15,3 @@ resource "aws_internet_gateway" "main" {
     Name = "${local.prefix}-main"
   }
 }
-
-
