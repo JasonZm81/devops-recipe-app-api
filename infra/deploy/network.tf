@@ -1,11 +1,15 @@
-# Network infrastructure
+##########################
+# Network infrastructure #
+##########################
 resource "aws_vpc" "main" {
   cidr_block           = "10.1.0.0/16"
   enable_dns_hostnames = true
   enable_dns_support   = true
 }
 
-# Internet Gateway needed for inbound access to the ALB
+#########################################################
+# Internet Gateway needed for inbound access to the ALB #
+#########################################################
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
@@ -14,13 +18,15 @@ resource "aws_internet_gateway" "main" {
   }
 }
 
-# Public subnet for load balancer public access
+#################################################
+# Public subnet for load balancer public access #
+#################################################
 resource "aws_subnet" "public_a" {
   vpc_id     = aws_vpc.main.id
   cidr_block = "10.1.1.0/24"
   # any resource loaded into subnet mapped to public IP address
   map_public_ip_on_launch = true
-  availability_zone               = "${data.aws_region.current.name}a"
+  availability_zone       = "${data.aws_region.current.name}a"
 
   tags = {
     Name = "${local.prefix}-public-a"
@@ -54,7 +60,7 @@ resource "aws_subnet" "public_b" {
   cidr_block = "10.1.2.0/24"
   # any resource loaded into subnet mapped to public IP address
   map_public_ip_on_launch = true
-  availability_zone               = "${data.aws_region.current.name}b"
+  availability_zone       = "${data.aws_region.current.name}b"
 
   tags = {
     Name = "${local.prefix}-public-b"
@@ -81,13 +87,15 @@ resource "aws_route" "public_internet_access_b" {
   gateway_id             = aws_internet_gateway.main.id
 }
 
-# Private subnet for internal access only
+###########################################
+# Private subnet for internal access only #
+###########################################
 resource "aws_subnet" "private_a" {
   vpc_id     = aws_vpc.main.id
   cidr_block = "10.1.10.0/24"
   # any resource loaded into subnet mapped to public IP address
   map_public_ip_on_launch = true
-  availability_zone               = "${data.aws_region.current.name}a"
+  availability_zone       = "${data.aws_region.current.name}a"
 
   tags = {
     Name = "${local.prefix}-private-a"
@@ -99,9 +107,112 @@ resource "aws_subnet" "private_b" {
   cidr_block = "10.1.11.0/24"
   # any resource loaded into subnet mapped to public IP address
   map_public_ip_on_launch = true
-  availability_zone               = "${data.aws_region.current.name}a"
+  availability_zone       = "${data.aws_region.current.name}a"
 
   tags = {
     Name = "${local.prefix}-private-b"
+  }
+}
+
+############################################################################
+# VPC endpoints to allow ECS to access ECR, CloudWatch and Systems Manager #
+############################################################################
+# security group to access that endpoint frm resources in subnet
+resource "aws_security_group" "endpoints_access" {
+  description = "Access to endpoints"
+  name        = "${local.prefix}-endpoint-access"
+  vpc_id      = aws_vpc.main.id
+
+  # inbound access to whatever in this security group is assigned to 
+  ingress {
+    cidr_blocks = [aws_vpc.main.cidr_block]
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+  }
+}
+
+# the endpoints:
+resource "aws_vpc_endpoint" "ecr" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.${data.aws_region.current.name}.ecr.api"
+  # Interface endpoint no need set up route table
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+
+  subnet_ids = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+
+  security_group_ids = [
+    aws_security_group.endpoints_access.id
+  ]
+
+  tags = {
+    Name = "${local.prefix}-ecr-endpoint"
+  }
+}
+
+resource "aws_vpc_endpoint" "dkr" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.${data.aws_region.current.name}.ecr.dkr"
+  # Interface endpoint no need set up route table
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+
+  subnet_ids = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+
+  security_group_ids = [
+    aws_security_group.endpoints_access.id
+  ]
+
+  tags = {
+    Name = "${local.prefix}-dkr-endpoint"
+  }
+}
+
+resource "aws_vpc_endpoint" "cloudwatch_logs" {
+  vpc_id              = aws_vpc.main.id
+  service_name        = "com.amazonaws.${data.aws_region.current.name}.logs"
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+
+  subnet_ids = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+
+  security_group_ids = [
+    aws_security_group.endpoints_access.id
+  ]
+
+  tags = {
+    Name = "${local.prefix}-cloudwatch-endpoint"
+  }
+}
+
+resource "aws_vpc_endpoint" "ssm" {
+  vpc_id              = aws_vpc.main.id
+  service_name        = "com.amazonaws.${data.aws_region.current.name}.ssmmessages"
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+
+  subnet_ids = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+
+  security_group_ids = [
+    aws_security_group.endpoints_access.id
+  ]
+
+  tags = {
+    Name = "${local.prefix}-ssmmessages-endpoint"
+  }
+}
+
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.${data.aws_region.current.name}.s3"
+  # Interface endpoint need set up route table
+  vpc_endpoint_type = "Gateway"
+  route_table_ids = [
+    aws_vpc.main.default_route_table_id
+  ]
+
+  tags = {
+    Name = "${local.prefix}-ssmmessages-endpoint"
   }
 }
