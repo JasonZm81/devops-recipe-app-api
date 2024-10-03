@@ -216,3 +216,5 @@ resource "aws_vpc_endpoint" "s3" {
     Name = "${local.prefix}-ssmmessages-endpoint"
   }
 }
+
+
