@@ -17,3 +17,4 @@ variable "contact" {
   description = "Contact name for tagging resources"
   default     = "jason@example.com"
 }
+
