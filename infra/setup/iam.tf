@@ -168,7 +168,6 @@ data "aws_iam_policy_document" "rds" {
       "rds:DescribeDBSubnetGroups",
       "rds:DescribeDBInstances",
       "rds:CreateDBSubnetGroup",
-      "rds:ModifyDBSubnetGroup", 
       "rds:DeleteDBSubnetGroup",
       "rds:CreateDBInstance",
       "rds:DeleteDBInstance",
