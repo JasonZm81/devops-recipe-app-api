@@ -93,7 +93,7 @@ resource "aws_ecs_task_definition" "api" {
           containerPath = "/vol/web/static"
           sourceVolume  = "static"
         }
-      ]
+      ],
       logConfiguration = {
         logDriver = "awslogs"
         option = {

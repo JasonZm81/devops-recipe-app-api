@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - prod
-  
+
 jobs:
   test-lint:
     name: Test and Lint
@@ -13,7 +13,7 @@ jobs:
     secrets:
       DOCKERHUB_USER: ${{ vars.DOCKERHUB_USER }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-  
+
   deploy:
     name: Deploy
     runs-on: ubuntu-22.04

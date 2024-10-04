@@ -10,12 +10,12 @@ resource "aws_db_subnet_group" "main" {
   ]
 
   tags = {
-    Name = "{local.prefix}-db-subnet-group"
+    Name = "${local.prefix}-db-subnet-group"
   }
 }
 
 resource "aws_security_group" "rds" {
-  description = "Allow access to the RDS database instance"
+  description = "Allow access to the RDS database instance."
   name        = "${local.prefix}-rds-inbound-access"
   vpc_id      = aws_vpc.main.id
 
