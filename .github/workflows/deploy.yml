@@ -38,6 +38,7 @@ jobs:
           # docker push ${{ vars.ECR_REPO_APP }}:$GITHUB_SHA
           # docker build --compress -t ${{ vars.ECR_REPO_PROXY }}:$GITHUB_SHA proxy/
           # docker push ${{ vars.ECR_REPO_PROXY }}:$GITHUB_SHA
+
           echo "Starting Docker login..."
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin "${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com" || { echo 'Docker login failed'; exit 1; }
           
